@@ -42,6 +42,9 @@ void wifiSetup() {
     //set custom ip for portal
     //wifiManager.setAPConfig(IPAddress(10,0,1,1), IPAddress(10,0,1,1), IPAddress(255,255,255,0));
 
+    //set static IP 
+    wifiManager.setSTAStaticIPConfig(IPAddress(192, 168, 1, 130), IPAddress(192, 168, 1, 1),IPAddress(255, 255, 255, 0));
+    
     //fetches ssid and pass from eeprom and tries to connect
     //if it does not connect it starts an access point with the specified name
     //here  "AutoConnectAP"
@@ -84,6 +87,8 @@ void rcSwitchSetup()
 {
   mySwitch.enableReceive(5);  // D1
   mySwitch.enableTransmit(4); //D2
+  mySwitch.setRepeatTransmit(10); //10 retries, should be default though
+  mySwitch.setPulseLength(327); //Measured with used remote
   pinMode(2, OUTPUT); //Declare Pin mode
   digitalWrite(2, LOW);    //Turn the LED off 
 }
@@ -119,10 +124,15 @@ void processRCSwitch()
       Serial.print("bit ");
       Serial.print("Protocol: ");
       Serial.println( mySwitch.getReceivedProtocol() );
+      Serial.print("Delay: ");
+      Serial.println( mySwitch.getReceivedDelay() );
 
       char tmp[256];
-      time_t now = time(nullptr); 
-      sprintf(tmp, "[%s][RC] Received %i\n", ctime(&now), mySwitch.getReceivedValue());
+      time_t now = time(nullptr);
+      char *t = ctime(&now);
+      if (t[strlen(t)-1] == '\n') t[strlen(t)-1] = '\0';
+
+      sprintf(tmp, "[%s][RC] Received Val:%i, Proto:%i, Delay:%i\n", t, mySwitch.getReceivedValue(), mySwitch.getReceivedProtocol(), mySwitch.getReceivedDelay());
       //sprintf(buffer, "[MAIN] Value %lu, bitlength %i, protocl %i\n", mySwitch.getReceivedValue() , mySwitch.getReceivedBitlength(), mySwitch.getReceivedProtocol());
       strcpy(buffer+strlen(buffer), tmp);
     
@@ -181,11 +191,13 @@ void setup() {
 
         
         time_t now = time(nullptr);        
-        //Serial.printf("[%s][onSetState] Device #%d (%s) state: %s value: %d\n", ctime(&now), device_id, device_name, state ? "ON" : "OFF", value);
-        //sprintf(buffer, "[MAIN] Device #%d (%s) state: %s value: %d\n", device_id, device_name, state ? "ON" : "OFF", value);
+        char *t = ctime(&now);
+        if (t[strlen(t)-1] == '\n') t[strlen(t)-1] = '\0';
         
         char tmp[256];
-        sprintf(tmp, "[%s][Hue] Device #%d (%s) state: %s value: %d\n", ctime(&now), device_id, device_name, state ? "ON" : "OFF", value);
+
+
+        sprintf(tmp, "[%s][Hue] Device #%d (%s) state: %s value: %d\n", t, device_id, device_name, state ? "ON" : "OFF", value);
 
         if (state) //true == ON, false == OFF
         {
