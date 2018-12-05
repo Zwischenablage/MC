@@ -45,7 +45,9 @@
 
 // initialize the library by associating any needed LCD interface pin
 // with the arduino pin number it is connected to
-const int rs = D2, en = D3, d4 = D5, d5 = D6, d6 = D7, d7 = D8;
+//const int rs = D2, en = D3, d4 = D5, d5 = D6, d6 = D7, d7 = D8;
+
+const int rs = 4, en = 0, d4 = 14, d5 = 12, d6 = 13, d7 = 15;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 void setup() {
@@ -53,6 +55,8 @@ void setup() {
   lcd.begin(16, 2);
   // Print a message to the LCD.
   lcd.print("hello, world!");
+
+  Serial.begin(115200);
 }
 
 void loop() {
@@ -61,4 +65,7 @@ void loop() {
   lcd.setCursor(0, 1);
   // print the number of seconds since reset:
   lcd.print(millis() / 1000);
+
+  Serial.println("test");
+  delay(500);
 }
